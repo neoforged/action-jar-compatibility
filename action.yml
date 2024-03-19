@@ -1,0 +1,15 @@
+name: 'jar-compatibility'
+description: 'An action for processing JCC outputs'
+
+inputs:
+
+  beta-version-pattern:
+    required: true
+    description: 'The pattern that indicates when a version is beta and can accept further breaking changes'
+  self-name:
+    required: true
+    description: 'The login name of the bot user'
+
+runs:
+  using: node20
+  main: dist/index.js
