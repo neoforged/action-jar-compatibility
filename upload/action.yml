@@ -1,0 +1,16 @@
+name: 'jcc-upload'
+description: 'Upload JCC output'
+
+inputs:
+  root-dir:
+    description: 'The root directory of the Gradle project'
+    default: '.'
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/upload-artifact@v4
+      name: Upload JCC file
+      with:
+        name: jcc
+        path: ${{ inputs.root-dir }}/jcc.json
