@@ -48944,7 +48944,7 @@ async function runPR(octo, pr, runId) {
                 const ci = incompats[clazz];
                 message += `  - \`${clazz}\`\n`;
                 ci.classIncompatibilities.forEach((cli) => {
-                    message += `    * ${getEmoji(cli)} \`${cli.message}\`\n`;
+                    message += `    * ${getEmoji(cli)} ${cli.message}\n`;
                     if (cli.isError)
                         isBreaking = true;
                 });
@@ -48971,11 +48971,22 @@ async function runPR(octo, pr, runId) {
             });
         });
         const selfComment = await getSelfComment(octo, pr.number);
+        if (message?.length > 2000) {
+            const oldMessage = message;
+            message = `
+\n<details>
+
+<summary>Compatibility checks</summary>
+
+${oldMessage}
+
+</details>`;
+        }
         if (message && isBreaking) {
             message =
                 `@${pr.user.login}, this PR introduces breaking changes.\n${isBeta
                     ? `Fortunately, this project is currently accepting breaking changes, but if they are not intentional, please revert them.`
-                    : `Unfortunately, this project is not accepting breaking changes right now. \nPlease revert them before this PR can be merged.`}\n` + message;
+                    : `Unfortunately, this project is not accepting breaking changes right now. \nPlease revert them before this PR can be merged.`}\nLast checked commit: [${pr.head.sha}](https://github.com/${github_1.context.repo.owner}/${github_1.context.repo.repo}/commit/${pr.head.sha}).\n` + message;
             let commentUrl = selfComment?.html_url;
             if (selfComment) {
                 await octo.rest.issues.updateComment({
