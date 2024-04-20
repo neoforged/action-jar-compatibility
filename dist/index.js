@@ -48917,13 +48917,24 @@ async function runPR(octo, pr, runId) {
         });
         const zip = await jszip_1.default.loadAsync(response.data);
         const jccJson = JSON.parse(await zip.file('jcc.json')?.async('string'));
-        const statuses = await axios_1.default.get(`https://api.github.com/repos/${pr.base.repo.full_name}/statuses/${pr.base.sha}`, {
-            responseType: 'json',
-            headers: {
-                Authorization: `Bearer ${process_1.default.env['GITHUB_TOKEN']}`
-            }
-        });
-        const status = statuses.data.find(status => status.description.startsWith('Version: '));
+        let status = null;
+        const commits = (await octo.rest.repos.listCommits({
+            sha: pr.base.sha,
+            repo: pr.base.repo.name,
+            owner: pr.base.repo.owner.login,
+            per_page: 10
+        })).data;
+        for (const commit of commits) {
+            const statuses = await axios_1.default.get(`https://api.github.com/repos/${pr.base.repo.full_name}/statuses/${commit.sha}`, {
+                responseType: 'json',
+                headers: {
+                    Authorization: `Bearer ${process_1.default.env['GITHUB_TOKEN']}`
+                }
+            });
+            status = statuses.data.find(status => status.description.startsWith('Version: '));
+            if (status)
+                break;
+        }
         if (!status) {
             await check.skipped('Could not determine the version the PR was built against');
             console.log(`Could not determine the version the PR was built against`);
