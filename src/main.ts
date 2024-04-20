@@ -209,7 +209,7 @@ export async function runPR(
     })
 
     const selfComment = await getSelfComment(octo, pr.number)
-    if (message?.length > 2000) {
+    if (message?.length > 1000) {
       const oldMessage = message
       message = `
 \n<details>
